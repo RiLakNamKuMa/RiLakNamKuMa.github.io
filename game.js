@@ -283,6 +283,47 @@
     ctx.shadowBlur = 0;
   }
 
+  function drawFood(cell, cellWidth, cellHeight) {
+    if (!cell) return;
+    const centerX = (cell.x + 0.5) * cellWidth;
+    const centerY = (cell.y + 0.52) * cellHeight;
+    const scale = Math.min(cellWidth, cellHeight) * 0.32;
+    ctx.save();
+    ctx.lineWidth = Math.max(2, scale * 0.12);
+    ctx.strokeStyle = "#9b5a2e";
+    ctx.fillStyle = "#e8a04f";
+    ctx.shadowColor = "#ffbd4a";
+    ctx.shadowBlur = Math.min(cellWidth, cellHeight) * 0.55;
+    ctx.beginPath();
+    ctx.ellipse(centerX, centerY, scale * 1.15, scale * 0.72, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = "#e8a04f";
+    ctx.lineCap = "round";
+    for (const side of [-1, 1]) {
+      for (const offset of [-0.42, 0, 0.42]) {
+        ctx.beginPath();
+        ctx.moveTo(centerX + side * scale * 0.55, centerY + offset * scale);
+        ctx.lineTo(centerX + side * scale * 1.25, centerY + (offset - 0.2 * side) * scale);
+        ctx.stroke();
+      }
+    }
+    ctx.strokeStyle = "#9b5a2e";
+    ctx.beginPath();
+    ctx.moveTo(centerX - scale * 0.35, centerY - scale * 0.55);
+    ctx.lineTo(centerX - scale * 0.7, centerY - scale * 1.05);
+    ctx.moveTo(centerX + scale * 0.35, centerY - scale * 0.55);
+    ctx.lineTo(centerX + scale * 0.7, centerY - scale * 1.05);
+    ctx.stroke();
+    ctx.fillStyle = "#142218";
+    ctx.beginPath();
+    ctx.arc(centerX - scale * 0.38, centerY - scale * 0.2, scale * 0.12, 0, Math.PI * 2);
+    ctx.arc(centerX + scale * 0.38, centerY - scale * 0.2, scale * 0.12, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
   function draw() {
     const cellWidth = canvas.width / grid.columns;
     const cellHeight = canvas.height / grid.rows;
@@ -293,7 +334,7 @@
     ctx.lineWidth = 1;
     for (let x = 0; x <= grid.columns; x += 1) { ctx.beginPath(); ctx.moveTo(x * cellWidth, 0); ctx.lineTo(x * cellWidth, canvas.height); ctx.stroke(); }
     for (let y = 0; y <= grid.rows; y += 1) { ctx.beginPath(); ctx.moveTo(0, y * cellHeight); ctx.lineTo(canvas.width, y * cellHeight); ctx.stroke(); }
-    drawCell(food, "#ffbd4a", cellWidth, cellHeight, 0.23);
+    drawFood(food, cellWidth, cellHeight);
     if (heart) drawHeart(heart, "#ff4f77", cellWidth, cellHeight);
     enemies.forEach((enemy) => drawCell(enemy, "#ff754d", cellWidth, cellHeight, 0.2));
     worm.forEach((part, index) => drawCell(part, index === 0 ? "#d9ff73" : "#58ff86", cellWidth, cellHeight, 0.18));
