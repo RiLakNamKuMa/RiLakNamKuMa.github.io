@@ -34,6 +34,7 @@
   let nextHeartAt = 5000;
   let nextExplosionAt = 6000;
   let explosionUntil = 0;
+  let explosionCenter = null;
   let respawnTimers = [];
 
   function readHighScore() {
@@ -62,6 +63,7 @@
     nextHeartAt = randomBetween(4000, 8000);
     nextExplosionAt = 6000;
     explosionUntil = 0;
+    explosionCenter = null;
     state = "ready";
     updateHud();
     setMessage("START // 방향키 또는 WASD로 이동");
@@ -133,9 +135,10 @@
       endGame("GAME OVER // 벽 또는 몸에 충돌");
       return;
     }
-    if (enemies.some((enemy) => enemy.x === head.x && enemy.y === head.y)) {
-      endGame("GAME OVER // 적과 충돌");
-      return;
+    const bombIndex = enemies.findIndex((enemy) => enemy.x === head.x && enemy.y === head.y);
+    if (bombIndex >= 0) {
+      detonateBomb(bombIndex, enemies[bombIndex], true);
+      if (state === "gameover") return;
     }
     worm.unshift(head);
     if (food && head.x === food.x && head.y === food.y) {
@@ -172,20 +175,31 @@
 
   function triggerExplosion() {
     nextExplosionAt += 6000;
-    life = Math.max(0, life - 10);
+    if (enemies.length === 0) return;
+    const bombIndex = Math.floor(Math.random() * enemies.length);
+    const bomb = enemies[bombIndex];
+    const wormHit = worm.some((part) => part.x === bomb.x && part.y === bomb.y);
+    detonateBomb(bombIndex, bomb, wormHit);
+  }
+
+  function detonateBomb(index, bomb, wormHit) {
+    explosionCenter = { x: bomb.x, y: bomb.y };
     explosionUntil = performance.now() + 800;
     stage.classList.remove("is-exploding");
     void stage.offsetWidth;
     stage.classList.add("is-exploding");
-    setMessage("WARNING // EXPLOSION -10 LIFE");
-    if (enemies.length > 0) {
-      enemies.splice(Math.floor(Math.random() * enemies.length), 1);
-      const timer = window.setTimeout(() => {
-        if (state !== "gameover" && enemies.length < 2) enemies.push(newEnemy());
-        respawnTimers = respawnTimers.filter((item) => item !== timer);
-      }, 2000);
-      respawnTimers.push(timer);
+    if (wormHit) {
+      life = Math.max(0, life - 10);
+      setMessage("WARNING // BOMB HIT -10 LIFE");
+    } else {
+      setMessage("EXPLOSION // SAFE DISTANCE");
     }
+    enemies.splice(index, 1);
+    const timer = window.setTimeout(() => {
+      if (state !== "gameover" && enemies.length < 2) enemies.push(newEnemy());
+      respawnTimers = respawnTimers.filter((item) => item !== timer);
+    }, 2000);
+    respawnTimers.push(timer);
     if (life <= 0) endGame("GAME OVER // LIFE ZERO");
     updateHud();
   }
@@ -232,8 +246,8 @@
   function updateHud() {
     scoreEl.textContent = String(score);
     highScoreEl.textContent = String(highScore);
-    lifeValueEl.textContent = String(life);
-    lifeHeartsEl.textContent = "♥".repeat(Math.max(0, Math.ceil(life / 20)));
+    lifeValueEl.textContent = `라이프 ${life}`;
+    lifeHeartsEl.textContent = "♥".repeat(Math.max(0, Math.ceil(life / 10)));
   }
 
   function updateButtons() {
@@ -243,6 +257,31 @@
   }
 
   function setMessage(text) { message.textContent = text; }
+
+  function drawCell(cell, color, cellWidth, cellHeight, padding) {
+    if (!cell) return;
+    const inset = Math.min(cellWidth, cellHeight) * padding;
+    ctx.fillStyle = color;
+    ctx.shadowColor = color;
+    ctx.shadowBlur = Math.min(cellWidth, cellHeight) * 0.7;
+    ctx.fillRect(cell.x * cellWidth + inset, cell.y * cellHeight + inset, cellWidth - inset * 2, cellHeight - inset * 2);
+    ctx.shadowBlur = 0;
+  }
+
+  function drawHeart(cell, color, cellWidth, cellHeight) {
+    if (!cell) return;
+    const centerX = (cell.x + 0.5) * cellWidth;
+    const centerY = (cell.y + 0.55) * cellHeight;
+    const size = Math.floor(Math.min(cellWidth, cellHeight) * 1.15);
+    ctx.fillStyle = color;
+    ctx.shadowColor = color;
+    ctx.shadowBlur = Math.min(cellWidth, cellHeight) * 0.8;
+    ctx.font = `${size}px Arial, sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("♥", centerX, centerY);
+    ctx.shadowBlur = 0;
+  }
 
   function draw() {
     const cellWidth = canvas.width / grid.columns;
@@ -255,12 +294,21 @@
     for (let x = 0; x <= grid.columns; x += 1) { ctx.beginPath(); ctx.moveTo(x * cellWidth, 0); ctx.lineTo(x * cellWidth, canvas.height); ctx.stroke(); }
     for (let y = 0; y <= grid.rows; y += 1) { ctx.beginPath(); ctx.moveTo(0, y * cellHeight); ctx.lineTo(canvas.width, y * cellHeight); ctx.stroke(); }
     drawCell(food, "#ffbd4a", cellWidth, cellHeight, 0.23);
-    if (heart) drawCell(heart, "#ff6f91", cellWidth, cellHeight, 0.35);
+    if (heart) drawHeart(heart, "#ff4f77", cellWidth, cellHeight);
     enemies.forEach((enemy) => drawCell(enemy, "#ff754d", cellWidth, cellHeight, 0.2));
     worm.forEach((part, index) => drawCell(part, index === 0 ? "#d9ff73" : "#58ff86", cellWidth, cellHeight, 0.18));
-    if (performance.now() < explosionUntil) {
-      ctx.fillStyle = "rgba(255, 190, 64, 0.2)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (explosionCenter && performance.now() < explosionUntil) {
+      const centerX = (explosionCenter.x + 0.5) * cellWidth;
+      const centerY = (explosionCenter.y + 0.5) * cellHeight;
+      ctx.fillStyle = "rgba(255, 190, 64, 0.24)";
+      ctx.strokeStyle = "rgba(255, 190, 64, 0.9)";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, Math.min(cellWidth, cellHeight) * 1.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    } else if (explosionCenter) {
+      explosionCenter = null;
     }
   }
 

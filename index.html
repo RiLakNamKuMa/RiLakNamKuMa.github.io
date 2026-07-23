@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="삼성전자 강남구 - 메트릭스 스타일 프로페셔널 웹사이트">
-    <title>삼성전자 강남구 | Matrix Profile</title>
+    <meta name="description" content="메트릭스 스타일 프로페셔널 웹사이트">
+    <title>Matrix Profile</title>
     <link rel="stylesheet" href="styles.css">
     <script src="script.js" defer></script>
     <script src="game.js" defer></script>
@@ -13,7 +13,7 @@
     <header class="site-header">
       <a class="brand" href="#home" aria-label="홈으로 이동">// PROFILE</a>
       <nav aria-label="주요 메뉴">
-        <a href="#about">About</a>
+        <a href="#home">About</a>
         <a href="#projects">Projects</a>
         <a href="#experience">Experience</a>
         <a href="#research">Research</a>
@@ -23,39 +23,31 @@
     </header>
 
     <main>
-      <section id="home" class="hero" aria-labelledby="hero-title">
-        <p class="eyebrow">SYSTEM ONLINE // 001</p>
-        <h1 id="hero-title">삼성전자 강남구</h1>
-        <p class="hero-copy">디지털 신호 속에서 다음 연결을 탐색합니다.</p>
-        <a class="cta" href="#games">Enter Games <span aria-hidden="true">→</span></a>
-      </section>
-
-      <section id="about" class="profile" aria-labelledby="profile-title">
-        <div class="profile-image-wrap">
-          <img src="profile-wrecking-ball-concept.png" alt="밝은 메트릭스풍의 귀여운 구형 로봇 프로필 이미지">
-        </div>
-        <div>
-          <p class="eyebrow">IDENTITY // VERIFIED</p>
-          <h2 id="profile-title">삼성전자 강남구</h2>
+      <section id="home" class="profile profile-top" aria-labelledby="profile-title">
+        <div class="profile-visual">
+          <div class="profile-image-wrap">
+            <img src="profile-wrecking-ball-concept.png" alt="밝은 메트릭스풍의 귀여운 구형 로봇 프로필 이미지">
+          </div>
+          <a class="cta profile-cta" href="#games">Enter Games <span aria-hidden="true">→</span></a>
         </div>
       </section>
 
       <section id="projects" class="content-section" aria-labelledby="projects-title">
         <p class="eyebrow">PROJECTS // PENDING DATA</p>
         <h2 id="projects-title">Projects</h2>
-        <p class="muted">프로젝트 정보는 <span class="needs-review">[사람 확인 필요]</span> 상태입니다.</p>
+        <p class="muted">루프 엔지니어링 실습</p>
       </section>
 
       <section id="experience" class="content-section" aria-labelledby="experience-title">
         <p class="eyebrow">EXPERIENCE // PENDING DATA</p>
         <h2 id="experience-title">Experience</h2>
-        <p class="muted">경력 정보는 <span class="needs-review">[사람 확인 필요]</span> 상태입니다.</p>
+        <p class="muted">초보</p>
       </section>
 
       <section id="research" class="content-section" aria-labelledby="research-title">
         <p class="eyebrow">RESEARCH // PENDING DATA</p>
         <h2 id="research-title">Research</h2>
-        <p class="muted">연구 정보는 <span class="needs-review">[사람 확인 필요]</span> 상태입니다.</p>
+        <p class="muted">MX 사업부</p>
       </section>
 
       <section id="games" class="games" aria-labelledby="games-title">
@@ -66,7 +58,7 @@
           <div class="game-hud" aria-label="게임 상태">
             <span>점수 <strong id="score">0</strong></span>
             <span>최고 <strong id="high-score">0</strong></span>
-            <span class="life-status"><span id="life-hearts" aria-hidden="true">♥♥♥♥♥</span> <strong id="life-value">100</strong>/100</span>
+            <span class="life-status" aria-label="라이프"><span id="life-hearts" aria-live="polite">♥♥♥♥♥</span><strong id="life-value" class="visually-hidden">라이프 100</strong></span>
           </div>
           <div id="game-stage" class="game-stage">
             <canvas id="game-canvas" width="720" height="480" role="img" aria-label="지렁이 게임판"></canvas>
@@ -77,22 +69,23 @@
             <button id="pause-game" type="button" disabled>Pause</button>
             <button id="restart-game" type="button">Restart</button>
           </div>
-          <div class="direction-pad" aria-label="모바일 방향 조작">
-            <button type="button" data-direction="up" aria-label="위로 이동">▲</button>
-            <div>
-              <button type="button" data-direction="left" aria-label="왼쪽으로 이동">◀</button>
-              <button type="button" data-direction="down" aria-label="아래로 이동">▼</button>
-              <button type="button" data-direction="right" aria-label="오른쪽으로 이동">▶</button>
+          <div class="joystick" aria-label="WASD 조이스틱 방향 조작">
+            <div class="joystick-base">
+              <button type="button" class="joy-up" data-direction="up" aria-label="W 또는 위로 이동">W</button>
+              <button type="button" class="joy-left" data-direction="left" aria-label="A 또는 왼쪽으로 이동">A</button>
+              <span class="joystick-center" aria-hidden="true">+</span>
+              <button type="button" class="joy-down" data-direction="down" aria-label="S 또는 아래로 이동">S</button>
+              <button type="button" class="joy-right" data-direction="right" aria-label="D 또는 오른쪽으로 이동">D</button>
             </div>
           </div>
-          <p class="game-help">방향키 / WASD · 적 충돌 또는 라이프 0이면 GAME OVER</p>
+          <p class="game-help">방향키 / W A S D · 적 충돌 또는 라이프 0이면 GAME OVER</p>
         </div>
       </section>
 
       <section id="contact" class="content-section" aria-labelledby="contact-title">
         <p class="eyebrow">CONTACT // PENDING DATA</p>
         <h2 id="contact-title">Contact</h2>
-        <p class="muted">연락처 정보는 <span class="needs-review">[사람 확인 필요]</span> 상태입니다.</p>
+        <p class="muted"><a href="https://github.com/RiLakNamKuMa">https://github.com/RiLakNamKuMa</a></p>
       </section>
     </main>
 
